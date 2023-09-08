@@ -6,9 +6,9 @@ Plan: try to use MindSpore to realize the same effect of MCAN which uses pytorch
 
 - [x] cfgs/base_cfgs.py
 
-- [ ] core/data/load_data.py
+- [x] core/data/load_data.py
 
-- [ ] core/model/mca.py
+- [x] core/model/mca.py
 
 - [ ] core/model/net_utils.py
 
