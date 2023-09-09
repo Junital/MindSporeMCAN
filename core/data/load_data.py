@@ -171,7 +171,7 @@ from core.data.data_utils import img_feat_path_load, img_feat_load, ques_load, t
 from core.data.data_utils import proc_img_feat, proc_ques, proc_ans
 
 import numpy as np
-import glob, json, mindspore, time
+import glob, json, time
 import mindspore.dataset as ds
 from mindspore import Tensor
 

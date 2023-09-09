@@ -10,10 +10,10 @@ Plan: try to use MindSpore to realize the same effect of MCAN which uses pytorch
 
 - [x] core/model/mca.py
 
-- [ ] core/model/net_utils.py
+- [x] core/model/net_utils.py
 
-- [ ] core/model/net.py
+- [x] core/model/net.py
 
-- [ ] core/model/optim.py
+- [x] core/model/optim.py
 
 - [ ] core/exec.py

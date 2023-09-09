@@ -195,7 +195,7 @@ from core.model.net_utils import FC, MLP, LayerNorm
 # import torch.nn.functional as F
 # import torch, math
 
-import mindspore, math
+import math
 import mindspore.nn as mnn
 import mindspore.ops as mop
 
@@ -320,7 +320,7 @@ class SA(mnn.Cell):
 # ---- Self Guided Attention ----
 # -------------------------------
 
-class SGA(nn.Module):
+class SGA(mnn.Cell):
     def __init__(self, __C):
         super(SGA, self).__init__()
 
