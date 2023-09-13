@@ -547,6 +547,7 @@ import numpy as np
 import mindspore.nn as mnn
 import mindspore.dataset as ds
 import mindspore
+import mindspore.ops as mop
 
 
 class Execution:
@@ -634,23 +635,21 @@ class Execution:
 
         # Define multi-thread dataloader
         if self.__C.SHUFFLE_MODE in ['external']:
-            dataloader = Data.DataLoader(
-                dataset,
-                batch_size=self.__C.BATCH_SIZE,
+            dataloader = ds.GeneratorDataset(
+                source=dataset,
                 shuffle=False,
-                num_workers=self.__C.NUM_WORKERS,
-                pin_memory=self.__C.PIN_MEM,
-                drop_last=True
+                num_parallel_workers=self.__C.NUM_WORKERS,
             )
+            dataloader.batch(self.__C.BATCH_SIZE, True)
+
+
         else:
-            dataloader = Data.DataLoader(
-                dataset,
-                batch_size=self.__C.BATCH_SIZE,
+            dataloader = ds.GeneratorDataset(
+                source=dataset,
                 shuffle=True,
-                num_workers=self.__C.NUM_WORKERS,
-                pin_memory=self.__C.PIN_MEM,
-                drop_last=True
+                num_parallel_workers=self.__C.NUM_WORKERS,
             )
+            dataloader.batch(self.__C.BATCH_SIZE, True)
 
         # Training script
         for epoch in range(start_epoch, self.__C.MAX_EPOCH):
@@ -734,14 +733,14 @@ class Execution:
 
                 # Gradient norm clipping
                 if self.__C.GRAD_NORM_CLIP > 0:
-                    nn.utils.clip_grad_norm_(
+                    mop.clip_by_global_norm(
                         net.parameters(),
                         self.__C.GRAD_NORM_CLIP
                     )
 
                 # Save the gradient information
                 for name in range(len(named_params)):
-                    norm_v = torch.norm(named_params[name][1].grad).cpu().data.numpy() \
+                    norm_v = mnn.Norm(named_params[name][1].grad).cpu().data.numpy() \
                         if named_params[name][1].grad is not None else 0
                     grad_norm[name] += norm_v * self.__C.GRAD_ACCU_STEPS
                     # print('Param %-3s Name %-80s Grad_Norm %-20s'%
@@ -763,7 +762,7 @@ class Execution:
                 'optimizer': optim.optimizer.state_dict(),
                 'lr_base': optim.lr_base
             }
-            torch.save(
+            mindspore.save_checkpoint(
                 state,
                 self.__C.CKPTS_PATH +
                 'ckpt_' + self.__C.VERSION +
@@ -833,7 +832,7 @@ class Execution:
         if state_dict is None:
             val_ckpt_flag = True
             print('Loading ckpt {}'.format(path))
-            state_dict = torch.load(path)['state_dict']
+            state_dict = mindspore.load_checkpoint(path)['state_dict']
             print('Finish!')
 
         # Store the prediction list
@@ -855,18 +854,17 @@ class Execution:
         net.cuda()
         net.eval()
 
-        if self.__C.N_GPU > 1:
-            net = nn.DataParallel(net, device_ids=self.__C.DEVICES)
+        # if self.__C.N_GPU > 1:
+        #     net = nn.DataParallel(net, device_ids=self.__C.DEVICES)
 
         net.load_state_dict(state_dict)
 
-        dataloader = Data.DataLoader(
-            dataset,
-            batch_size=self.__C.EVAL_BATCH_SIZE,
+        dataloader = ds.GeneraterDataset(
+            source=dataset,
             shuffle=False,
-            num_workers=self.__C.NUM_WORKERS,
-            pin_memory=True
+            num_parallel_workers=self.__C.NUM_WORKERS,
         )
+        dataloader.batch(self.__C.BATCH_SIZE)
 
         for step, (
                 img_feat_iter,

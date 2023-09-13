@@ -16,4 +16,4 @@ Plan: try to use MindSpore to realize the same effect of MCAN which uses pytorch
 
 - [x] core/model/optim.py
 
-- [ ] core/exec.py
+- [x] core/exec.py
